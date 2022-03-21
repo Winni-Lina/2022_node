@@ -5,5 +5,4 @@ const app = http.createServer(function (req,res){
     console.log(__dirname+req.url);
     res.end("Hello, World");
 })
-
 app.listen(3000);
