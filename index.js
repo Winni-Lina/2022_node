@@ -3,7 +3,7 @@ const fs = require('fs');
 const url = require('url');
 const qs= require('querystring')
 
-function templateHTML(title, list, description){
+function templateHTML(title, list, body, contorl){
     return `
     <!doctype html>
     <html log="ko">
@@ -15,8 +15,7 @@ function templateHTML(title, list, description){
         <h1><a href="/">WEB</a></h1>                
         ${list}
         <h2>${title}</h2>
-        <a href="/create">create</a>
-        <p>${description}</p>
+        <p>${contorl}</p>
     </body>
     </html>
 `
@@ -44,7 +43,8 @@ const app = http.createServer(function (request, response) {
 
             fs.readdir('data/',function(err,data){
                 const list = templateList(data);
-                const template = templateHTML(title,list,description);
+                // 메인화면에서는 create(새 게시글 작성)만 가능하게
+                const template = templateHTML(title,list,description, `<a href="create">create</a>`);
                 response.writeHead(200);
                 response.end(template);
             })
@@ -63,13 +63,14 @@ const app = http.createServer(function (request, response) {
         fs.readdir('data/', function (err,data){
             const title = 'Web - create';
             const list = templateList(data);
+            // 특정 게시글을 읽고 있을 땐 create(게시글 생성)와 update(수정)를 보이게
             const template = templateHTML(title, list, `
             <form action="/create_process" method="post">
                 <p><input type="text" name="title" placeholder="title"/></p>
                 <p><textarea name="description" placeholder="discription"></textarea></p>
                 <p><input type="submit"/></p>
             </form>
-            `)
+            `, `<a href="create">create</a> <a href="/update?id=${title}">update</a>`);
             response.writeHead(200);
             response.end(template);
         })
