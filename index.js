@@ -1,25 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const url = require('url');
-
-// const app = http.createServer(function (req,res) {
-//     //let url = req.url;
-//
-//     // if (url === '/')
-//     //     url = '/index.html';
-//     // if (url === '/favicon.ico')
-//     //     return res.writeHead(404);
-//     // res.writeHead(200);
-//     // res.end(fs.readFileSync(__dirname+url));
-//
-//     // let _url = req.url;
-//     // let queryData = url.parse(_url, true).query;
-//     // res.end(queryData.id);
-//
-//
-// });
-
-
+const qs= require('querystring')
 
 function templateHTML(title, list, description){
     return `
@@ -39,6 +21,7 @@ function templateHTML(title, list, description){
     </html>
 `
 }
+
 function templateList(filelist){
     let list = '<ul>';
     for(let i=0; i<filelist.length; i++){
@@ -47,15 +30,18 @@ function templateList(filelist){
     list += '</ul>'
     return list;
 }
+
 const app = http.createServer(function (request, response) {
     const _url = request.url
     const queryData = url.parse(_url, true).query
     const pathname = url.parse(_url, true).pathname
 
     if (pathname === '/') {
+
         if (queryData.id === undefined) {
             const title = 'Welcome'
             const description = 'Hello, Node.js'
+
             fs.readdir('data/',function(err,data){
                 const list = templateList(data);
                 const template = templateHTML(title,list,description);
@@ -78,7 +64,7 @@ const app = http.createServer(function (request, response) {
             const title = 'Web - create';
             const list = templateList(data);
             const template = templateHTML(title, list, `
-            <form action="create_process" method="post">
+            <form action="/create_process" method="post">
                 <p><input type="text" name="title" placeholder="title"/></p>
                 <p><textarea name="description" placeholder="discription"></textarea></p>
                 <p><input type="submit"/></p>
@@ -87,6 +73,19 @@ const app = http.createServer(function (request, response) {
             response.writeHead(200);
             response.end(template);
         })
+
+    } else if(pathname==='/create_process'){
+        let body = '';
+        request.on('data',function (data){
+            body += data;
+        });
+        request.on('end', function (){
+            const post = qs.parse(body);
+            const title = post.title;
+            const description = post.description;
+        });
+        response.writeHead(200);
+        response.end('success');
 
     } else {
         response.writeHead(404);
