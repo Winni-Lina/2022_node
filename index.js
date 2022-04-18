@@ -53,7 +53,11 @@ const app = http.createServer(function (request, response) {
                     const title = queryData.id
                     const list = templateList(data);
                     // 특정 게시글을 읽고 있을 땐 create(새 게시글 생성)와 update(게시글 수정)을 보이게
-                    const template = templateHTML(title, list, description, `<a href="/create">create</a>&nbsp;<a href="/update?id=${title}">update</a>`);
+                    const template = templateHTML(title, list, description, `<a href="/create">create</a>&nbsp;<a href="/update?id=${title}">update</a>
+                        <form action="delete_process" method="post">
+                        <input type="hidden" name="id" value="${title}">
+                        <input type="submit" value="delete">
+                        </form>`);
                     response.writeHead(200)
                     response.end(template)
                 })
@@ -123,6 +127,19 @@ const app = http.createServer(function (request, response) {
                     response.writeHead(302, {location : `/?id=${title}`})
                     response.end()
                 });
+            });
+        });
+    } else if (pathname === '/delete_process') {
+        let body = '';
+        request.on('data', function (data) {
+            body += body + data;
+        });
+        request.on('end', function () {
+            const post = qs.parse(body);
+            const id = post.id;         // 바꾸기 전의 파일 이름 (게시글 제목)
+            fs.unlink(`data/${id}`,function (err){
+                response.writeHead(302, {Location:'/'});
+                response.end();
             });
         });
     } else {
