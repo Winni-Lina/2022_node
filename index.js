@@ -2,10 +2,14 @@ const express = require('express');
 const app = express();
 const template = require('./lib/template.js');
 const fs = require('fs');
+const compression = require('compression');
+
 // const bodyParser = require('body-parser');
+
 app.use(express.urlencoded({extended: false}));
-app
-    .get('/', function (req, res) {
+app.use(compression());
+
+app.get('/', function (req, res) {
         fs.readdir('./data', function (err, filelist) {
             const title = 'Welcome';
             // 웹 페이지의 본문 내용
@@ -16,8 +20,7 @@ app
             res.send(html);
         });
     })
-app
-    .get('/page/:pageId', function (req, res) {
+app.get('/page/:pageId', function (req, res) {
         fs.readdir('./data', function (err, filelist) {
             const list = template.List(filelist);
             const id = req.params.pageId;
@@ -33,8 +36,7 @@ app
             })
         })
     })
-app
-    .get('/create', function (req, res) {
+app.get('/create', function (req, res) {
         fs.readdir('./data', function (err, filelist) {
             const title = 'WEB - create';
             const list = template.List(filelist);
